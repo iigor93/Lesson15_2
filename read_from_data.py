@@ -27,25 +27,61 @@ def main_read(animal_id):
             
             WHERE main_animal_id = (?)"""
 
-        query_read_add_data = """
+        query_read_add_color_data = """
             SELECT 
             animal_v2.id AS main_animal_id,
-            colors.color_type AS color_color_name,
-            breeds.breed_type AS breed_name
+            colors.color_type AS color_color_name
             
             FROM animal_v2
             
             JOIN animal_color ON  animal_color.animal_id = main_animal_id
             JOIN colors ON colors.id = animal_color.color_id
-            JOIN animal_breed ON animal_breed.animal_id = main_animal_id
-            JOIN breeds ON breeds.id = animal_breed.breed_id
             
             WHERE main_animal_id = (?)
             """
+
+        query_read_add_breed_data = """
+            SELECT 
+            animal_v2.id AS main_animal_id,
+            breeds.breed_type AS breed_name
+
+            FROM animal_v2
+
+            JOIN animal_breed ON animal_breed.animal_id = main_animal_id
+            JOIN breeds ON breeds.id = animal_breed.breed_id
+
+            WHERE main_animal_id = (?)
+            """
+
         param = []
         param.append(animal_id)
         param = tuple(param)
 
-        read_data_main = cur.execute(query_read_main_data, param).fetchall()
-        read_data_add = cur.execute(query_read_add_data, param).fetchall()
-    return read_data_main, read_data_add
+        read_data_main = cur.execute(query_read_main_data, param).fetchall()[0]
+        read_data_add_color = cur.execute(query_read_add_color_data, param).fetchall()
+        read_data_add_breed = cur.execute(query_read_add_breed_data, param).fetchall()
+
+        color_list = []
+        breed_list = []
+
+        for item in read_data_add_color:
+            color_list.append(item[1])
+        for item in read_data_add_breed:
+            breed_list.append(item[1])
+
+        data_return = {}
+        data_return['name'] = read_data_main[1]
+        data_return['age'] = read_data_main[2]
+        data_return['animal_id'] = read_data_main[3]
+        data_return['date_of_birth'] = read_data_main[4]
+        data_return['outcome_year'] = read_data_main[5]
+        data_return['outcome_month'] = read_data_main[6]
+
+        data_return['outcome_type'] = read_data_main[7]
+        data_return['outcome_subtype'] = read_data_main[8]
+        data_return['outcome_animal_type'] = read_data_main[9]
+
+        data_return['colors'] = color_list
+        data_return['breed'] = breed_list
+
+    return data_return
